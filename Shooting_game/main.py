@@ -18,39 +18,40 @@ char = pygame.image.load('source/standing.png')
 
 clock = pygame.time.Clock()
 
-x = 50
-y = 400
-width = 64
-height = 64
-velocity = 10
+class Player(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.velocity = 5
+        self.isJump = False
+        self.left = False
+        self.right = False
+        self.walkCount = 0
+        self.jumpCount = 10
 
-isJump = False
-jumpCount = 10
-left = False
-right = False
-walkCount = 0
+    def move(self, win):
+        if self.walkCount + 1 <= 27:
+            self.walkCount = 0
+
+        if self.left:
+            win.blit(walkLeft[walkCount//3], (self.x,self.y))
+            walkCount += 1
+
+        elif self.right:
+            win.blit(walkRight[walkCount//3], (self.x,self.y))
+            walkCount += 1
+
+        else:
+            win.blit(char, (x,y))
 
 def redrawGameWindow():
-    global walkCount
     win.blit(bg, (0,0))
-
-    if walkCount + 1 >= 27:
-        walkCount = 0
-
-    if left:
-        win.blit(walkLeft[walkCount//3], (x,y))
-        walkCount += 1
-
-    elif right:
-        win.blit(walkRight[walkCount//3], (x,y))
-        walkCount += 1
-
-    else:
-        win.blit(char, (x,y))
-
+    haejeok.move(win)
     pygame.display.update()
 
-
+haejeok = Player(200, 410, 64, 64)
 run = True
 while run:
     pygame.time.delay(100)
@@ -61,22 +62,22 @@ while run:
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and x > velocity:
-        x -= velocity
-        left = True
-        right = False
+    if keys[pygame.K_LEFT] and haejeok.x > haejeok.velocity:
+        haejeok.x -= haejeok.velocity
+        haejeok.left = True
+        haejeok.right = False
 
-    elif keys[pygame.K_RIGHT] and x < 500 - velocity - width:
-        x += velocity
-        left = False
-        right = True
+    elif keys[pygame.K_RIGHT] and haejeok.x < 500 - haejeok.velocity - haejeok.width:
+        haejeok.x += haejeok.velocity
+        haejeok.left = False
+        haejeok.right = True
 
     else:
-        right = False
-        left = False
-        walkCount = 0
+        haejeok.right = False
+        haejeok.left = False
+        haejeok.walkCount = 0
     
-    if not(isJump):
+    if not(haejeok.isJump):
         #if keys[pygame.K_UP] and y > velocity:
         #    y -= velocity
 
@@ -84,21 +85,21 @@ while run:
         #    y += velocity
         
         if keys[pygame.K_SPACE]:
-            isJump = True
-            right = False
-            left = False
-            walkCount = 0
+            haejeok.isJump = True
+            haejeok.right = False
+            haejeok.left = False
+            haejeok.walkCount = 0
     
     else:
-        if jumpCount >= -10:
+        if haejeok.jumpCount >= -10:
             neg = 1
-            if jumpCount < 0:
+            if haejeok.jumpCount < 0:
                 neg = -1
-            y -= (jumpCount * abs(jumpCount)*0.3)
-            jumpCount -= 1
+            haejeok.y -= (haejeok.jumpCount * abs(haejeok.jumpCount)*0.3)
+            haejeok.jumpCount -= 1
         else:
-            jumpCount = 10
-            isJump = False
+            haejeok.jumpCount = 10
+            haejeok.isJump = False
 
     redrawGameWindow()
 
