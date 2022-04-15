@@ -43,6 +43,7 @@ class Player(object):
         self.walkCount = 0
         self.jumpCount = 10
         self.standing = True
+        self.hitbox = (self.x + 20, self.y, 28, 60) #top left x, top left y, width, height of the hitbox
 
     def move(self, win):
         if self.walkCount + 1 <= 27:
@@ -62,6 +63,8 @@ class Player(object):
                 win.blit(walkRight[0], (self.x,self.y))
             else:
                 win.blit(walkLeft[0], (self.x,self.y))
+        self.hitbox = (self.x + 17, self.y + 11, 29, 52)
+        pygame.draw.rect(win, (255,0,0), self.hitbox, 2) #2 = borderness
 
 class Enenmy(object):
     walkRight = [pygame.image.load('source/R1E.png'), pygame.image.load('source/R2E.png'), pygame.image.load('source/R3E.png'), 
@@ -82,6 +85,7 @@ class Enenmy(object):
         self.path = [x, end]
         self.walkCount = 0
         self.velocity = 3
+        self.hitbox = (self.x + 17, self.y + 2, 31, 57)
     
     def move(self):
         if self.velocity > 0: #if right
@@ -109,6 +113,11 @@ class Enenmy(object):
         else:
             win.blit(self.walkLeft[self.walkCount//3], (self.x,self.y))
             self.walkCount += 1
+        self.hitbox = (self.x + 17, self.y + 2, 31, 57)
+        pygame.draw.rect(win, (255,0,0), self.hitbox, 2)
+
+    def hit(self):
+        print("Hit!")
 
 def redrawGameWindow():
     win.blit(bg, (0,0))
@@ -122,22 +131,35 @@ haejeok = Player(200, 410, 64, 64)
 goblin = Enenmy(100, 410, 64, 64, 300)
 bullets = []
 run = True
+shootLoop = 0
+
 while run:
     clock.tick(27)
+
+    if shootLoop > 0:
+        shootLoop += 1
+    if shootLoop > 3:
+        shootLoop = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
 
     for bullet in bullets:
+        if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
+            if bullet.x + bullet.radius > goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
+                goblin.hit()
+                bullets.pop(bullets.index(bullet))
+
         if bullet.x < 500 and bullet.x > 0:
             bullet.x += bullet.velocity
+
         else:
             bullets.pop(bullets.index(bullet))
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_a]:
+    if keys[pygame.K_a] and shootLoop == 0:
         if haejeok.left:
             facing = -1
         else:
